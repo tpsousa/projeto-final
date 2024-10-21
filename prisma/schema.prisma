@@ -12,3 +12,64 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+model Group {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  description String 
+  leads Lead[] @relation("GroupLeads") 
+}
+
+model Lead{
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  email String @unique @db.VarChar(255)
+  phone String @db.VarChar(255)
+  status LeadStatus @default(New)
+  groups Group[] @relation("GroupLeads")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  campaigns LeadCampaign[]
+}
+
+enum LeadStatus {
+  New
+  Contacted
+  Qualified
+  Converted
+  Unresponsive
+  Disqualified
+  Archived
+}
+
+model Campaign {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  description String
+  startDate DateTime
+  endDate DateTime?
+  leads LeadCampaign[]
+}
+
+model LeadCampaign {
+  leadId Int
+  campaignId Int
+  status LeadCAmpaignStatus @default(New)
+  campaign Campaign @relation(fields :[campaignId],references: [id])
+  lead Lead @relation(fields: [leadId],references: [id])
+  @@id([leadId,campaignId])
+}
+
+
+enum LeadCAmpaignStatus {
+ New
+ Engaged
+ followUp_Scheduled
+ Contacted
+ Qualified
+ Unresponsive
+ Converted
+ Disqualified
+ Re_Engaged
+ Opted_Out
+
+}
